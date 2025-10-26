@@ -5,24 +5,25 @@
         public NativeLocationModel(double latitude
             , double longitude
             , float accuracy
-            , double altituyde
-            , double speed
-            , DateTime timeStamp
-            , double verticalAccuracy
-            , bool reducedAccuracy
-            , double course
-            , bool isFromMockProvider)
+            // , double altituyde
+            //, double speed
+            //, DateTime timeStamp
+            //, double verticalAccuracy
+            //, bool reducedAccuracy
+            //, double course
+            //, bool isFromMockProvider
+           )
         {
             Latitude = latitude;
             Longitude = longitude;
             Accuracy = accuracy;
-            Altitude = altituyde;
-            Speed = speed;
-            Timestamp = timeStamp;
-            VerticalAccuracy = verticalAccuracy;
-            ReducedAccuracy = reducedAccuracy;
-            Course = course;
-            IsFromMockProvider = isFromMockProvider;
+            //Altitude = altituyde;
+            //Speed = speed;
+            //Timestamp = timeStamp;
+            //VerticalAccuracy = verticalAccuracy;
+            //ReducedAccuracy = reducedAccuracy;
+            //Course = course;
+            //IsFromMockProvider = isFromMockProvider;
         }
 
         public double Latitude { get; set; }

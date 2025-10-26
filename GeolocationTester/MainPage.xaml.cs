@@ -1,25 +1,20 @@
 ﻿using Microsoft.Maui.Controls.Maps;
-
-
-#if ANDROID
+using Microsoft.Maui.Maps;
 using zaraga.plugins.NativeLocation;
-#endif
-#if IOS
-using zaraga.plugins.NativeLocation;
-#endif
+using zaraga.plugins.NativeLocation.Models;
 
 namespace GeolocationTester
 {
     public partial class MainPage : ContentPage
     {
         private bool _getGeolocation = false;
-        private readonly NativeLocationService _locationService;
+        //private readonly NativeLocationService _locationService;
 
 
         public MainPage()
         {
             InitializeComponent();
-            _locationService = new();
+            //_locationService = new();
         }
 
 
@@ -27,7 +22,6 @@ namespace GeolocationTester
         {
             try
             {
-                Geolocation.LocationChanged += Geolocation_LocationChanged;
                 // Using GeolocationAccuracy.Medium as a balance between accuracy and power consumption.
                 // Developers can adjust this value to High or Low based on their specific requirements.
                 var request = new GeolocationListeningRequest(GeolocationAccuracy.Medium);
@@ -51,10 +45,10 @@ namespace GeolocationTester
                                 lblLatitudeRecurrent.Text = geolocation.Latitude.ToString();
                                 lblAccuracyRecurrent.Text = geolocation.Accuracy.ToString();
 
-                                //var pintoRemove = map.Pins.FirstOrDefault(x => x.Label == "Recurrent Location");
-                                //if (pintoRemove != null)
-                                //    map.Pins.Remove(pintoRemove);
-                                //map.Pins.Add(new Pin() { Location = geolocation, Label = "Recurrent Location", Address = "" });
+                                var pintoRemove = map.Pins.FirstOrDefault(x => x.Label == "MAUI Location");
+                                if (pintoRemove != null)
+                                    map.Pins.Remove(pintoRemove);
+                                map.Pins.Add(new Pin() { Location = geolocation, Label = "MAUI Location", Address = "" });
                             });
                         }
 
@@ -63,9 +57,9 @@ namespace GeolocationTester
                     return _getGeolocation;
                 });
 
-                _locationService.LocationChanged += _locationService_LocationChanged;
-                _locationService.StatusChanged += _locationService_StatusChanged;
-                _locationService.Initialize();
+                NativeLocationService.Instance.LocationChanged += LocationService_LocationChanged;
+                NativeLocationService.Instance.StatusChanged += LocationService_StatusChanged;
+                NativeLocationService.Instance.Initialize();
             }
             catch (Exception ex)
             {
@@ -75,7 +69,7 @@ namespace GeolocationTester
             }
         }
 
-        private async void _locationService_StatusChanged(object? sender, string e)
+        private async void LocationService_StatusChanged(object? sender, string e)
         {
             try
             {
@@ -87,7 +81,7 @@ namespace GeolocationTester
             }
         }
 
-        private async void _locationService_LocationChanged(object? sender, Location e)
+        private async void LocationService_LocationChanged(object? sender, NativeLocationModel e)
         {
             try
             {
@@ -96,8 +90,13 @@ namespace GeolocationTester
                 lblLongitude.Text = e.Longitude.ToString();
                 lblAccuracy.Text = e.Accuracy.ToString();
 
-                map.Pins.Clear();
-                map.Pins.Add(new Pin() { Location = new Location(e.Latitude, e.Longitude), Label = "update Location", Address = "" });
+                MapSpan mapSpan = MapSpan.FromCenterAndRadius(new Location(e.Latitude, e.Longitude), Distance.FromKilometers(0.004));
+                map.MoveToRegion(mapSpan);
+
+                var pintoRemove = map.Pins.FirstOrDefault(x => x.Label == "Native Location");
+                if (pintoRemove != null)
+                    map.Pins.Remove(pintoRemove);
+                map.Pins.Add(new Pin() { Location = new Location(e.Latitude, e.Longitude), Label = "Native Location", Address = "" });
             }
             catch (Exception ex)
             {
@@ -110,13 +109,12 @@ namespace GeolocationTester
             try
             {
                 _getGeolocation = false;
-                Geolocation.LocationChanged -= Geolocation_LocationChanged;
                 Geolocation.StopListeningForeground();
                 string status = "Stopped listening for foreground location updates";
 
-                _locationService.Stop();
-                _locationService.LocationChanged -= _locationService_LocationChanged;
-                _locationService.StatusChanged -= _locationService_StatusChanged;
+                NativeLocationService.Instance.Stop();
+                NativeLocationService.Instance.LocationChanged -= LocationService_LocationChanged;
+                NativeLocationService.Instance.StatusChanged -= LocationService_StatusChanged;
             }
             catch (Exception ex)
             {
@@ -124,27 +122,6 @@ namespace GeolocationTester
                 await Shell.Current.DisplayAlert("", ex.Message, "OK");
             }
         }
-
-        private async void Geolocation_LocationChanged(object? sender, GeolocationLocationChangedEventArgs e)
-        {
-            //try
-            //{
-            //    lblLatitude.Text = e.Location.Latitude.ToString();
-            //    lblLongitude.Text = e.Location.Longitude.ToString();
-            //    lblAccuracy.Text = e.Location.Accuracy.ToString();
-
-            //    MapSpan mapSpan = MapSpan.FromCenterAndRadius(e.Location, Distance.FromKilometers(0.004));
-            //    map.MoveToRegion(mapSpan);
-
-            //    map.Pins.Clear();
-            //    map.Pins.Add(new Pin() { Location = e.Location, Label = "Current Location", Address = e.Location.Accuracy.ToString() });
-            //}
-            //catch (Exception ex)
-            //{
-            //    await Shell.Current.DisplayAlert("", ex.Message, "OK");
-            //}
-        }
-
     }
 
 }

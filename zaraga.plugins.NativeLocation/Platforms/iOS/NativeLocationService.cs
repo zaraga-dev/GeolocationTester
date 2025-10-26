@@ -1,5 +1,6 @@
-﻿using CoreLocation;
-using Microsoft.Maui.Platform;
+﻿using System;
+using CoreLocation;
+using zaraga.plugins.NativeLocation.Models;
 
 namespace zaraga.plugins.NativeLocation;
 
@@ -46,24 +47,9 @@ public partial class NativeLocationService
     private void LocationsUpdated(object sender, CLLocationsUpdatedEventArgs e)
     {
         var locations = e.Locations;
-        double accuracy = 0;
-        if (OperatingSystem.IsIOSVersionAtLeast(14) || OperatingSystem.IsMacCatalystVersionAtLeast(14))
-        {
-            //accuracy = locations[^1].HorizontalAccuracy;
-            accuracy = locations[^1].CourseAccuracy;
-        }
-
-        LocationChanged?.Invoke(this, new Microsoft.Maui.Devices.Sensors.Location()
-        {
-            Latitude = locations[^1].Coordinate.Latitude,
-            Longitude = locations[^1].Coordinate.Longitude,
-            Accuracy = accuracy,
-            Altitude = locations[^1].Altitude,
-            Speed = locations[^1].Speed,
-            Timestamp = locations[^1].Timestamp.ToDateTime(),
-            VerticalAccuracy = locations[^1].VerticalAccuracy,
-            ReducedAccuracy = false,
-            Course = (float)locations[^1].Course
-        });
+        LocationChanged?.Invoke(this, new NativeLocationModel(
+            locations[^1].Coordinate.Latitude,
+            locations[^1].Coordinate.Longitude,
+            (float)locations[^1].HorizontalAccuracy));
     }
 }

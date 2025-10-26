@@ -10,15 +10,8 @@ namespace zaraga.plugins.NativeLocation;
 
 public partial class NativeLocationService : Java.Lang.Object, ILocationListener
 {
-    /// <summary>
-    /// minimum time interval between location updates in milliseconds
-    /// </summary>
-    private readonly long MIN_TIME_MS = 500;
-
-    /// <summary>
-    /// minimum distance between location updates in meters
-    /// </summary>
-    private readonly float MIN_DISTANCE_MTS = 0.5f;
+    private static readonly long MIN_TIME_MS = 1000;
+    private static readonly float MIN_DISTANCE_M = 0.1f;
 
     private LocationManager _androidLocationManager;
 
@@ -36,26 +29,24 @@ public partial class NativeLocationService : Java.Lang.Object, ILocationListener
         MainThread.BeginInvokeOnMainThread(async () =>
         {
             var status = await Permissions.RequestAsync<Permissions.LocationWhenInUse>();
-
             if (status != PermissionStatus.Granted)
             {
-                OnStatusChanged("Permission for location is not granted, we can't get location updates");
+                OnStatusChanged("Permission for location is not granted, can't get location updates");
                 return;
             }
 
             if (!_androidLocationManager.IsLocationEnabled)
             {
-                OnStatusChanged("Location is not enabled, we can't get location updates");
+                OnStatusChanged("Location is not enabled, can't get location updates");
                 return;
             }
 
             if (!_androidLocationManager.IsProviderEnabled(LocationManager.GpsProvider))
             {
-                OnStatusChanged("GPS Provider is not enabled, we can't get location updates");
+                OnStatusChanged("GPS Provider is not enabled, can't get location updates");
                 return;
             }
-
-            _androidLocationManager.RequestLocationUpdates(LocationManager.GpsProvider, MIN_TIME_MS, MIN_DISTANCE_MTS, this);
+            _androidLocationManager.RequestLocationUpdates(LocationManager.GpsProvider, MIN_TIME_MS, MIN_DISTANCE_M, this);
         });
     }
 
@@ -63,34 +54,7 @@ public partial class NativeLocationService : Java.Lang.Object, ILocationListener
     {
         if (location != null)
         {
-            float verticalMeters = 0;
-            bool mockProvider = false;
-
-            if (OperatingSystem.IsAndroidVersionAtLeast(26))
-            {
-                verticalMeters = location.VerticalAccuracyMeters;
-            }
-
-            if (OperatingSystem.IsAndroidVersionAtLeast(31))
-            {
-                mockProvider = location.Mock;
-            }
-            else
-            {
-                mockProvider = location.IsFromMockProvider;
-            }
-
-            OnLocationChanged(new NativeLocationModel(
-                location.Latitude
-                , location.Longitude
-                , location.Accuracy
-                , location.Altitude
-                , location.Speed
-                , DateTime.Now
-                , verticalMeters
-                , reducedAccuracy: false
-                , course: 0
-                , mockProvider));
+            OnLocationChanged(new NativeLocationModel(location.Latitude, location.Longitude, location.Accuracy));
         }
     }
 
