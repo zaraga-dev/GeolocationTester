@@ -1,0 +1,56 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="GeolocationTester.MainPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:maps="http://schemas.microsoft.com/dotnet/2021/maui/maps">
+
+    <Grid
+        Padding="30,0"
+        RowDefinitions="Auto,Auto,Auto,*"
+        RowSpacing="25">
+
+        <Button
+            x:Name="btnStart"
+            Grid.Row="0"
+            Grid.Column="0"
+            Clicked="btnStart_Clicked"
+            SemanticProperties.Hint="Counts the number of times you click"
+            Text="Iniciar" />
+
+        <Button
+            x:Name="btnfinish"
+            Grid.Row="1"
+            Grid.Column="0"
+            Clicked="btnfinish_Clicked"
+            SemanticProperties.Hint="Counts the number of times you click"
+            Text="Fin" />
+
+        <Grid
+            Grid.Row="2"
+            Grid.Column="0"
+            ColumnDefinitions="*,*">
+
+            <VerticalStackLayout Grid.Row="0" Grid.Column="0">
+
+                <Label Text="Nativo" />
+                <Label x:Name="lblLatitude" />
+                <Label x:Name="lblLongitude" />
+                <Label x:Name="lblAccuracy" />
+            </VerticalStackLayout>
+            <VerticalStackLayout Grid.Row="0" Grid.Column="1">
+                <Label Text="Maui" />
+                <Label x:Name="lblLatitudeRecurrent" />
+                <Label x:Name="lblLongitudeRecurrent" />
+                <Label x:Name="lblAccuracyRecurrent" />
+            </VerticalStackLayout>
+        </Grid>
+
+        <maps:Map
+            x:Name="map"
+            Grid.Row="3"
+            Grid.Column="0"
+            IsShowingUser="True" />
+    </Grid>
+
+</ContentPage>
