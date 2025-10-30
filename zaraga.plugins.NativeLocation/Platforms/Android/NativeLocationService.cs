@@ -21,33 +21,43 @@ public partial class NativeLocationService : Java.Lang.Object, ILocationListener
         _androidLocationManager?.RemoveUpdates(this);
     }
 
-    protected void AndroidInitialize()
+    protected async void AndroidInitialize()
     {
-        OnStatusChanged($"LocationService->Initialize");
-        _androidLocationManager ??= (LocationManager)AndroidApp.Context.GetSystemService(Context.LocationService);
-
-        MainThread.BeginInvokeOnMainThread(async () =>
+        try
         {
-            var status = await Permissions.RequestAsync<Permissions.LocationWhenInUse>();
-            if (status != PermissionStatus.Granted)
-            {
-                OnStatusChanged("Permission for location is not granted, can't get location updates");
-                return;
-            }
+            OnStatusChanged($"LocationService->Initialize");
+            _androidLocationManager ??= (LocationManager)AndroidApp.Context.GetSystemService(Context.LocationService);
 
-            if (!_androidLocationManager.IsLocationEnabled)
+            MainThread.BeginInvokeOnMainThread(async () =>
             {
-                OnStatusChanged("Location is not enabled, can't get location updates");
-                return;
-            }
+                var status = await Permissions.RequestAsync<Permissions.LocationWhenInUse>();
+                if (status != PermissionStatus.Granted)
+                {
+                    OnStatusChanged("Permission for location is not granted, can't get location updates");
+                    return;
+                }
 
-            if (!_androidLocationManager.IsProviderEnabled(LocationManager.GpsProvider))
-            {
-                OnStatusChanged("GPS Provider is not enabled, can't get location updates");
-                return;
-            }
-            _androidLocationManager.RequestLocationUpdates(LocationManager.GpsProvider, MIN_TIME_MS, MIN_DISTANCE_M, this);
-        });
+                if (OperatingSystem.IsAndroidVersionAtLeast(28))
+                {
+                    if (!_androidLocationManager.IsLocationEnabled)
+                    {
+                        OnStatusChanged("Location is not enabled, can't get location updates");
+                        return;
+                    }
+                }
+
+                if (!_androidLocationManager.IsProviderEnabled(LocationManager.GpsProvider))
+                {
+                    OnStatusChanged("GPS Provider is not enabled, can't get location updates");
+                    return;
+                }
+                _androidLocationManager.RequestLocationUpdates(LocationManager.GpsProvider, MIN_TIME_MS, MIN_DISTANCE_M, this);
+            });
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
     }
 
     public void OnLocationChanged(Location location)
