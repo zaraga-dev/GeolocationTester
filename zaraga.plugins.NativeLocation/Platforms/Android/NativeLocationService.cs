@@ -11,7 +11,7 @@ namespace zaraga.plugins.NativeLocation;
 public partial class NativeLocationService : Java.Lang.Object, ILocationListener
 {
     private static readonly long MIN_TIME_MS = 1000;
-    private static readonly float MIN_DISTANCE_M = 0.1f;
+    private static readonly float MIN_DISTANCE_M = 0.5f;
 
     private LocationManager _androidLocationManager;
 
